@@ -1,9 +1,9 @@
 #include <TM1637Display.h>
+#include <Ultrasonic.h>
+Ultrasonic ultrasonic (5, 6);
 
 const int buttonPin = 2;
 const int laserPin = 7;
-const int trigPin = 5;
-const int echoPin = 6;
 
 int distance;
 
@@ -15,8 +15,6 @@ TM1637Display display(CLK, DIO);
 void setup() {
   pinMode(buttonPin, INPUT_PULLUP); 
   pinMode(laserPin, OUTPUT);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
 
   digitalWrite(laserPin, LOW); 
 
@@ -28,26 +26,20 @@ void setup() {
 
 void loop() {
 
+
   int buttonState = digitalRead(buttonPin);
 
   if (buttonState == LOW) { 
-
-    digitalWrite(trigPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trigPin, LOW);
-    distance = pulseIn(echoPin, HIGH) / 58.2; 
-
-    Serial.print("Расстояние: ");
-    Serial.print(distance);
-    Serial.println(" см");
-
-    display.showNumberDec(distance, false);
+    Serial.print("Distance in CM: ");
+    Serial.println(ultrasonic.distanceRead());
+    delay(50);
+    display.showNumberDec(ultrasonic.distanceRead(), false);
   } else {
     digitalWrite(laserPin, LOW); 
     display.clear(); 
   }
-
-  if (distance > 30) { 
+  distance = ultrasonic.distanceRead();
+  if (distance >= 100) { 
     digitalWrite(laserPin, HIGH); 
   } else {
     digitalWrite(laserPin, LOW);
